@@ -1,40 +1,828 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DesignFul</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>บัญชีเงินกู้ ยู่ยี่</title>
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;600&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <!-- Libs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #ffd6e0, #ffe6f0);
-      text-align: center;
-      padding: 50px;
+    /* =====================
+       PASTEL PINK ARCADE THEME – Ultra Glam (Design only)
+       ===================== */
+    :root{
+      /* Core palette — Pastel Pink Zone */
+      --pink-strong:#ff71b8;   /* accent/high-contrast */
+      --pink-mid:#ffa6cf;      /* primary UI */
+      --pink-soft:#ffd6e8;     /* backgrounds */
+      --rose:#ffc2d8;          /* candy rose */
+      --peach:#ffdbc1;         /* warm support */
+      --lav:#e6d4ff;           /* lavender */
+      --sky:#c7ecff;           /* baby sky */
+      --mint:#c7f5e9;          /* mint highlight */
+
+      --bg1:#ffeaf2;  /* top glow (very light) */
+      --bg2:#ffd3ea;  /* mid */
+      --bg3:#f5ccff;  /* lower depth */
+
+      --ink:#2a1b2a;         /* text on light */
+      --ink-soft:#6b4a6b;    /* muted text */
+      --white:#ffffff;
     }
-    h1 {
-      font-size: 3rem;
-      color: #ff3e80;
-      margin-bottom: 10px;
+
+    /* Background: pastel nebula + soft stars + gentle scanlines */
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--ink); font-family:'Mali', cursive, sans-serif;
+      background:
+        radial-gradient(1200px 800px at 15% 10%, var(--bg3) 0%, transparent 55%),
+        radial-gradient(950px 650px at 85% 15%, #ffe1f1 0%, transparent 60%),
+        linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 55%, #ffe1ff 100%);
+      overflow-x:hidden;
     }
-    p {
-      font-size: 1.2rem;
-      color: #333;
+
+    /* Starfield – softer, pastel specks */
+    .fx-stars, .fx-stars::before, .fx-stars::after{
+      content:""; position:fixed; inset:0; pointer-events:none; z-index:-1; background-repeat:repeat;
+      animation: starDrift 140s linear infinite;
+      background-image: 
+        radial-gradient(2px 2px at 20px 30px, rgba(255,182,219,.7) 50%, transparent 51%),
+        radial-gradient(2px 2px at 130px 110px, rgba(198,153,255,.7) 50%, transparent 51%),
+        radial-gradient(2px 2px at 260px 70px, rgba(171,220,255,.7) 50%, transparent 51%);
+      background-size: 280px 180px;
+      opacity:.45; filter: drop-shadow(0 0 6px rgba(255,182,219,.35));
     }
-    .box {
-      margin: 40px auto;
-      padding: 20px;
-      max-width: 500px;
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    .fx-stars::before{ animation-duration: 200s; opacity:.35; transform:scale(1.2); }
+    .fx-stars::after{ animation-duration: 260s; opacity:.28; transform:scale(1.4); }
+    @keyframes starDrift{ to{ background-position: -3500px 1800px; } }
+
+    /* CRT scanlines overlay – lighter for pastel */
+    .scanlines{ position:fixed; inset:0; pointer-events:none; z-index:999; background: repeating-linear-gradient( to bottom, rgba(255,255,255,.08) 0 1px, transparent 1px 4px); mix-blend-mode: soft-light; opacity:.08; }
+
+    /* Container – pastel neon border */
+    .container{ max-width:1220px; margin:3rem auto; padding:2.2rem; border-radius:28px; background:linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.55));
+      box-shadow:0 22px 60px rgba(255,127,178,.25), inset 0 0 0 2px rgba(255,255,255,.65), 0 0 40px rgba(255,182,219,.35);
+      position:relative; overflow:hidden; isolation:isolate; z-index:1;}
+    .container::before{ content:""; position:absolute; inset:-2px; border-radius:30px; padding:2px; background:conic-gradient(from 0deg, var(--pink-strong), #ff90cd, var(--lav), var(--sky), var(--peach), var(--pink-strong)); -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; animation: borderShift 8s linear infinite; filter:saturate(1.1);}    
+    .container::after{ content:""; position:absolute; inset:0; background:
+        radial-gradient(800px 220px at 50% -10%, rgba(255,173,206,.25), transparent 60%),
+        radial-gradient(500px 160px at 10% 110%, rgba(198,153,255,.18), transparent 60%);
+      pointer-events:none; }
+    @keyframes borderShift{ to{ transform: rotate(1turn);} }
+
+    /* Header – pastel shimmer */
+    h1{ text-align:center; font-family:"Press Start 2P", system-ui, sans-serif; letter-spacing:.5px; font-size:1.65rem; margin:0 0 1.1rem; 
+        background:linear-gradient(90deg, var(--pink-strong), #c88bff, #89d8ff, var(--pink-strong));
+        -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow:0 1px 0 rgba(255,255,255,.6), 0 0 24px rgba(255,179,213,.3); animation: hue 10s linear infinite;}
+    @keyframes hue{ to{ filter:hue-rotate(360deg);} }
+
+    /* Chart wrapper – frosted candy glass */
+    .chart-wrapper{ width:100%; height:340px; background:linear-gradient(180deg, rgba(255,255,255,.6), rgba(255,255,255,.35)); border-radius:22px; padding:1rem; box-shadow:0 12px 28px rgba(255,143,199,.25), 0 0 0 1px rgba(255,176,214,.55) inset; position:relative;}
+    .chart-wrapper::after{ content:"PRINCIPAL"; position:absolute; top:10px; right:14px; font-family:"Press Start 2P"; font-size:.62rem; color:var(--ink-soft); opacity:.8; letter-spacing:.5px;}
+
+    /* Mascot */
+    .anim-character{ display:block; margin:18px auto; width:170px; filter: drop-shadow(0 6px 24px rgba(255,143,199,.45)); animation: bob 3s ease-in-out infinite;}
+    @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+    /* Form – soft panel + grid sheen */
+    form#loanForm{ margin-top:1rem; backdrop-filter: blur(10px); background:linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.55)); border-radius:20px; padding:1rem; box-shadow:inset 0 0 0 1px rgba(255,176,214,.55); position:relative; overflow:hidden;}
+    form#loanForm::before{ content:""; position:absolute; inset:0; background-image: linear-gradient(transparent 0 0), linear-gradient(90deg, rgba(255,176,214,.25) 1px, transparent 1px), linear-gradient(0deg, rgba(255,176,214,.25) 1px, transparent 1px); background-size:0 0, 24px 24px, 24px 24px; opacity:.25; }
+    label{ display:block; margin:.75rem 0 .35rem; font-weight:800; color:#c16db0; text-shadow:0 0 10px rgba(255,176,214,.35);}    
+    input{ width:100%; padding:.8rem 1rem; border-radius:14px; background:#fff; border:1px solid rgba(255,176,214,.75); color:var(--ink); font-size:1rem;}
+    input:focus{ outline:none; border-color:#ff9dca; box-shadow:0 0 0 3px rgba(255,157,202,.25);}    
+
+    /* Buttons – pastel neon + sparkles */
+    button{ --glow: rgba(255,176,214,.8); margin-top:1rem; border:none; padding:.9rem 1.5rem; border-radius:999px; font-weight:900; color:#4b2a4b; background: linear-gradient(90deg, #ff9ecd, #c7ecff 60%, #ffd6e8); box-shadow:0 10px 22px rgba(255,143,199,.35), 0 0 22px var(--glow); cursor:pointer; transition: transform .12s ease, box-shadow .12s ease, filter .2s ease; position:relative; overflow:hidden;}
+    /* sweeping sheen */
+    button::after{ content:""; position:absolute; inset:-40%; background: conic-gradient(from 0deg, transparent, rgba(255,255,255,.45), transparent 30%); transform: rotate(0deg); animation: sweep 2.6s linear infinite; mix-blend-mode: overlay;}
+    @keyframes sweep{ to{ transform: rotate(360deg);} }
+    /* glitter particles */
+    button::before{ content:""; position:absolute; inset:-20%; pointer-events:none; background:
+        radial-gradient(3px 3px at 20% 30%, rgba(255,182,219,.95) 60%, transparent 61%),
+        radial-gradient(2px 2px at 70% 60%, rgba(198,153,255,.95) 60%, transparent 61%),
+        radial-gradient(2px 2px at 40% 80%, rgba(171,220,255,.95) 60%, transparent 61%),
+        radial-gradient(3px 3px at 85% 25%, rgba(255,224,237,.95) 60%, transparent 61%);
+      opacity:.0; transform: translateY(8px);
+      animation: glitter 2.2s ease-in-out infinite;
+    }
+    @keyframes glitter{
+      0%{opacity:0; transform: translateY(8px)}
+      30%{opacity:.85;}
+      60%{opacity:.4;}
+      100%{opacity:0; transform: translateY(-8px)}
+    }
+    button:hover{ transform: translateY(-2px) scale(1.01); box-shadow:0 14px 30px rgba(255,143,199,.45), 0 0 34px var(--glow); filter:saturate(1.08);}    
+    button:active{ transform: translateY(1px) scale(.99);}    
+
+    /* Specific pills (kept semantic, recolored to pastel) */
+    .btn-repay{ background:linear-gradient(90deg, #a4d2ff, #c7ecff);} 
+    .btn-interest{ background:linear-gradient(90deg, #ff9ecd, #ffd6e8);} 
+    .btn-paid{ background:linear-gradient(90deg, #bdf7d9, #e3fff4); color:#134e3a; cursor:not-allowed; box-shadow:0 0 0 1px rgba(255,255,255,.45) inset;}
+    .btn-delete{ background:linear-gradient(90deg, #ff93b5, #ffc3d8);} 
+    .btn-history{ background:linear-gradient(90deg, #d7b6ff, #f2deff);} 
+    .btn-edit{ background:linear-gradient(90deg, #e6e9f2, #ffffff);} 
+
+    /* Table – light candy glass */
+    table{ margin-top:1.3rem; width:100%; border-collapse:separate; border-spacing:0; background:linear-gradient(180deg, rgba(255,255,255,.8), rgba(255,255,255,.6)); border-radius:18px; overflow:hidden; box-shadow:0 16px 42px rgba(255,143,199,.25), 0 0 0 1px rgba(255,176,214,.55) inset;}
+    th, td{ padding:1rem .8rem; text-align:center; border-bottom:1px solid rgba(255,176,214,.45); font-size:.95rem; color:var(--ink);} 
+    th{ background:linear-gradient(90deg, #ffc1dd, #e9d3ff); color:#4b2a4b; font-family:"Press Start 2P"; font-size:.72rem; letter-spacing:.5px; text-transform:uppercase;}
+    tbody tr:hover{ background:rgba(255,214,232,.45);}    
+    tfoot td{ background:rgba(255,255,255,.7); font-weight:900; color:#7a557a; text-align:left; line-height:1.9;}
+
+    /* Value colors */
+    .val-gold{ color:#e19b00;} 
+    .val-red{ color:#d84b7a; }
+    .val-blue{ color:#3b82b6; }
+    .val-green{ color:#1e9d6c; }
+
+    /* Row states – gradient direction per readability */
+    .row-overdue{ background: linear-gradient(90deg, #ff8db4 0%, #ffd2e1 100%); }
+    .row-partial-paid{ background: linear-gradient(90deg, #d49aff 0%, #f8e9ff 100%); }
+    .row-soon-due{ background: linear-gradient(90deg, #ffc7a5 0%, #ffe9e0 100%); }
+
+    /* Mobile Cards */
+    .mobile-cards{ display:none; margin-top:1.4rem; flex-direction:column; gap:1rem; }
+    .loan-card{ background:linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.65)); padding:1.2rem; border-radius:18px; box-shadow:0 12px 30px rgba(255,143,199,.25), 0 0 0 1px rgba(255,176,214,.55) inset; animation: slideIn .45s ease-out; }
+    .loan-card.card-overdue{ box-shadow:0 0 0 2px rgba(255,141,180,.4), 0 12px 30px rgba(255,143,199,.25); }
+    .loan-card.card-partial-paid{ box-shadow:0 0 0 2px rgba(212,154,255,.35), 0 12px 30px rgba(255,143,199,.25); }
+    .loan-card.card-soon-due{ box-shadow:0 0 0 2px rgba(255,199,165,.4), 0 12px 30px rgba(255,143,199,.25); }
+    @keyframes slideIn{ from{ transform:translateY(14px); opacity:.0;} to{ transform:translateY(0); opacity:1;} }
+    .card-header{ display:flex; flex-direction:column; align-items:center; text-align:center; margin-bottom:.6rem; }
+    .card-header .name{ font-family:"Press Start 2P"; font-size:.92rem; color:#b44a8b; text-shadow:0 0 10px rgba(255,179,213,.45);} 
+    .card-content div{ display:flex; justify-content:space-between; padding:.45rem 0; border-bottom:1px dashed rgba(255,176,214,.6); }
+    .card-content div:last-child{ border-bottom:none; }
+    .card-label{ font-weight:900; color:#c16db0; }
+    .card-value{ text-align:right; color:#4b2a4b; }
+    .card-buttons{ display:flex; flex-wrap:wrap; justify-content:center; gap:.5rem; margin-top:.6rem; }
+    .card-buttons button{ margin-top:0; padding:.7rem 1rem; font-size:.85rem; }
+
+    /* Mobile summary */
+    .mobile-summary{ display:none; margin-top:1rem; padding:1rem; background:linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.65)); border-radius:14px; font-weight:900; color:#7a557a; text-align:left; line-height:1.7; box-shadow:0 12px 28px rgba(255,143,199,.25), 0 0 0 1px rgba(255,176,214,.55) inset; }
+
+    /* Popups – soft glass */
+    .popup{ display:none; position:fixed; inset:0; background:rgba(255,214,232,.65); justify-content:center; align-items:center; z-index:99999; opacity:0; transition:opacity .25s ease; }
+    .popup.show{ display:flex; opacity:1; }
+    .popup-content{ background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.7)); padding:1.6rem; border-radius:18px; text-align:center; box-shadow:0 24px 50px rgba(255,143,199,.35), inset 0 0 0 1px rgba(255,176,214,.65); max-width:540px; width:92%; transform:translateY(6px) scale(.98); transition: transform .2s ease;}
+    .popup.show .popup-content{ transform:translateY(0) scale(1); }
+    .popup-content.small{ max-width:360px; background:transparent; box-shadow:none; }
+    .popup-content h3{ font-family:"Press Start 2P"; font-size:1rem; margin:.2rem 0 1rem; color:#c84a93; text-shadow:0 0 12px rgba(255,176,214,.55);} 
+    .popup-content ul{ list-style:none; padding:0; max-height:320px; overflow-y:auto; text-align:left; background:linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.65)); padding:1rem; border-radius:14px; }
+    .popup-content li{ padding:.55rem; border-bottom:1px solid rgba(255,176,214,.55); display:flex; justify-content:space-between; align-items:center; gap:.6rem; color:#4b2a4b; }
+    .popup-content li:last-child{ border-bottom:none; }
+    .popup-content li span.date{ color:#7a557a; font-size:.85rem; margin-left:auto; }
+
+    /* Custom scrollbar */
+    *{ scrollbar-width: thin; scrollbar-color: #ffb0d6 transparent; }
+    *::-webkit-scrollbar{ height:10px; width:10px }
+    *::-webkit-scrollbar-thumb{ background:linear-gradient(#ff9ecd,#e6d4ff); border-radius:10px }
+    *::-webkit-scrollbar-track{ background:transparent }
+
+    /* Responsive */
+    @media (max-width: 768px){
+      .container{ margin:1rem auto; padding:1rem; }
+      h1{ font-size:1.2rem; }
+      .chart-wrapper{ height:260px; }
+      table, tfoot{ display:none; }
+      .mobile-cards{ display:flex; }
+      .mobile-summary{ display:block; }
+      form label, form input, form button{ font-size:.95rem; }
+      form button{ padding:.75rem 1.2rem; }
     }
   </style>
 </head>
 <body>
-  <div class="box">
-    <h1>🌸 DesignFul 🌸</h1>
-    <p>ยินดีต้อนรับสู่เว็บไซต์ทดลองของคุณ</p>
-    <p>โค้ดนี้รันได้ทันทีบน GitHub Pages</p>
+  <!-- FX layers -->
+  <div class="fx-stars"></div>
+  <div class="scanlines"></div>
+
+  <div class="container">
+    <h1>🧸 บัญชีเงินกู้ ยู่ยี่ 💗</h1>
+    <div class="chart-wrapper">
+      <canvas id="loanChart"></canvas>
+    </div>
+    <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExczdzZWNzbDV1a3E0ZDNpbzRxNW93Y256Z2V6NjRxZjJ3MmppMjF6eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/DZQTp76MfXhRGOBWok/giphy.gif" class="anim-character" />
+
+    <form id="loanForm">
+      <label>ชื่อ</label>
+      <input type="text" id="name" required />
+      <label>เงินต้น (บาท)</label>
+      <input type="text" id="principal" required class="formatted-input" />
+      <label>ดอกเบี้ยต่อเดือน (%)</label>
+      <input type="number" id="rate" step="0.01" required />
+      <label>วันที่เริ่มยืม</label>
+      <input type="date" id="startDate" required />
+      <label>กำหนดวันจ่ายดอกเบี้ย (ไม่บังคับ)</label>
+      <input type="date" id="dueDate" />
+      <button type="submit">➕ เพิ่มลูกหนี้</button>
+      <button type="button" onclick="downloadExcel()">📥 ดาวน์โหลด Excel</button>
+      <input type="file" id="uploadFile" accept=".json" onchange="uploadData(event)" style="display:inline-block;margin-top:1rem" />
+    </form>
+
+    <table id="summaryTable">
+      <thead>
+        <tr>
+          <th>ชื่อ</th>
+          <th>เงินต้นคงเหลือ</th>
+          <th>ดอกเบี้ย/เดือน</th>
+          <th>วันที่เริ่ม</th>
+          <th>วันที่ผ่านมา</th>
+          <th>ดอกเบี้ยคงเหลือ</th>
+          <th>ดอกเบี้ยเดือนหน้า</th>
+          <th>ครบกำหนดถัดไป</th>
+          <th>คืนเงินต้น</th>
+          <th>จ่ายดอก</th>
+          <th>ประวัติ</th>
+          <th>ลบ</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="12" id="summaryFooter">—</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <!-- Mobile Cards View -->
+    <div id="mobileCards" class="mobile-cards"></div>
+
+    <!-- Mobile Summary -->
+    <div id="mobileSummary" class="mobile-summary"></div>
   </div>
+
+  <!-- Popup สำหรับเพิ่มการคืนเงิน -->
+  <div class="popup" id="repaymentPopup">
+    <div class="popup-content">
+      <h3 class="text-xl font-bold mb-4 text-pink-600">คืนเงินต้น</h3>
+      <p id="repaymentMessage" class="mb-4 text-gray-600"></p>
+      <input type="text" id="repaymentAmount" placeholder="กรอกจำนวนเงิน (บาท)" class="mb-4 formatted-input" />
+      <div class="btn-group">
+        <button onclick="submitRepayment()">ยืนยัน</button>
+        <button onclick="hidePopup('repaymentPopup')" class="bg-gray-400 shadow-md hover:bg-gray-500 hover:shadow-lg">ยกเลิก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup สำหรับจ่ายดอกเบี้ย -->
+  <div class="popup" id="interestPopup">
+    <div class="popup-content">
+      <h3 class="text-xl font-bold mb-4 text-pink-600">จ่ายดอกเบี้ย</h3>
+      <p id="interestMessage" class="mb-4 text-gray-600"></p>
+      <input type="text" id="interestAmount" placeholder="กรอกจำนวนเงินที่จ่าย (บาท)" class="mb-4 formatted-input" />
+      <div class="btn-group">
+        <button onclick="submitInterestPayment()">ยืนยัน</button>
+        <button onclick="hidePopup('interestPopup')" class="bg-gray-400 shadow-md hover:bg-gray-500 hover:shadow-lg">ยกเลิก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup สำหรับยืนยันการลบ -->
+  <div class="popup" id="deletePopup">
+    <div class="popup-content">
+      <h3 class="text-xl font-bold mb-4 text-red-600">ยืนยันการลบ</h3>
+      <p id="deleteMessage" class="mb-4 text-gray-600"></p>
+      <div class="btn-group">
+        <button onclick="confirmDelete()" class="bg-red-500 shadow-md hover:bg-red-600 hover:shadow-lg">ยืนยัน</button>
+        <button onclick="hidePopup('deletePopup')" class="bg-gray-400 shadow-md hover:bg-gray-500 hover:shadow-lg">ยกเลิก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup สำหรับแสดงประวัติ -->
+  <div class="popup" id="historyPopup">
+    <div class="popup-content">
+      <h3 class="text-xl font-bold mb-4">ประวัติการทำรายการ</h3>
+      <ul id="historyList"></ul>
+      <div class="btn-group">
+        <button onclick="hidePopup('historyPopup')">ปิด</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Popup สำหรับแก้ไขประวัติการทำรายการ -->
+  <div class="popup" id="editPaymentPopup">
+      <div class="popup-content">
+          <h3 class="text-xl font-bold mb-4 text-pink-600">แก้ไขรายการ</h3>
+          <p id="editPaymentMessage" class="mb-4 text-gray-600"></p>
+          <input type="text" id="editPaymentAmount" placeholder="กรอกจำนวนเงินใหม่ (บาท)" class="mb-4 formatted-input" />
+          <div class="btn-group">
+              <button onclick="submitEditPayment()">บันทึก</button>
+              <button onclick="hidePopup('editPaymentPopup')" class="bg-gray-400 shadow-md hover:bg-gray-500 hover:shadow-lg">ยกเลิก</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Popup สำหรับแก้ไขวันครบกำหนด -->
+  <div class="popup" id="editDueDatePopup">
+      <div class="popup-content">
+          <h3 class="text-xl font-bold mb-4 text-pink-600">แก้ไขวันครบกำหนด</h3>
+          <p id="editDueDateMessage" class="mb-4 text-gray-600"></p>
+          <input type="date" id="editDueDateInput" class="mb-4" />
+          <div class="btn-group">
+              <button onclick="submitEditDueDate()">บันทึก</button>
+              <button onclick="hidePopup('editDueDatePopup')" class="bg-gray-400 shadow-md hover:bg-gray-500 hover:shadow-lg">ยกเลิก</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Popup สำหรับแจ้งเตือนการเพิ่มลูกหนี้สำเร็จ (Transparent) -->
+  <div class="popup" id="successPopup">
+    <div class="popup-content small">
+      <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExczdzZWNzbDV1a3E0ZDNpbzRxNW93Y256Z2V6NjRxZjJ3MmppMjF6eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/DZQTp76MfXhRGOBWok/giphy.gif" alt="Success GIF" style="width: 60%; height: auto;">
+    </div>
+  </div>
+
+  <script>
+    let loans = JSON.parse(localStorage.getItem('loans') || '[]');
+
+    let currentLoanIndex = -1;
+    let currentTransactionIndex = -1;
+    let currentTransactionType = '';
+
+    // ฟังก์ชันช่วยแสดงผลวันที่ให้อยู่ในรูปแบบที่อ่านง่าย
+    function formatDate(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    // คำนวณเงินที่จ่ายไปแล้วทั้งหมดของลูกหนี้แต่ละคน
+    function getTotalPaid(loan) {
+      return (loan.repayments || []).reduce((sum, r) => sum + parseFloat(r.amount), 0);
+    }
+
+    // คำนวณดอกเบี้ยคงเหลือ (รายเดือนคงที่)
+    function getRemainingInterest(loan) {
+      const totalPaidPrincipal = getTotalPaid(loan);
+      let netPrincipal = loan.principal - totalPaidPrincipal;
+      if (netPrincipal < 0) netPrincipal = 0;
+
+      const startDate = new Date(loan.startDate);
+      const now = new Date();
+      const monthsPassed = (now.getFullYear() - startDate.getFullYear()) * 12 + (now.getMonth() - startDate.getMonth());
+      const monthlyInterestAmount = parseFloat((netPrincipal * loan.rate / 100).toFixed(2));
+      const totalMonthlyInterestDue = parseFloat((monthlyInterestAmount * monthsPassed).toFixed(2));
+      const totalInterestPaid = (loan.interestPayments || []).reduce((sum, p) => sum + parseFloat(p.amount), 0);
+      const remainingInterest = parseFloat((totalMonthlyInterestDue - totalInterestPaid).toFixed(2));
+      return Math.max(0, remainingInterest);
+    }
+    
+    function showInterestPopup(index) {
+        currentLoanIndex = index;
+        const loan = loans[index];
+        const totalPaidPrincipal = getTotalPaid(loan);
+        let netPrincipal = loan.principal - totalPaidPrincipal;
+        if (netPrincipal < 0) netPrincipal = 0;
+        const nextMonthInterest = parseFloat((netPrincipal * loan.rate / 100).toFixed(2));
+        document.getElementById('interestMessage').textContent = 
+          `จำนวนเงินที่แนะนำให้จ่ายสำหรับ ${loan.name} (ดอกเบี้ยเต็มเดือน):`;
+        document.getElementById('interestAmount').value = nextMonthInterest.toLocaleString();
+        showPopup('interestPopup');
+    }
+    
+    function submitInterestPayment() {
+        const paymentAmount = parseFloat(document.getElementById('interestAmount').value.replace(/,/g, ''));
+        if (isNaN(paymentAmount) || paymentAmount <= 0) {
+            alert('กรุณากรอกจำนวนเงินที่ถูกต้อง');
+            return;
+        }
+        const loan = loans[currentLoanIndex];
+        const totalPaidPrincipal = getTotalPaid(loan);
+        let netPrincipal = loan.principal - totalPaidPrincipal;
+        if (netPrincipal < 0) netPrincipal = 0;
+        const monthlyInterestAmount = parseFloat((netPrincipal * loan.rate / 100).toFixed(2));
+        const remainingInterest = getRemainingInterest(loan);
+        const totalInterestDue = remainingInterest + monthlyInterestAmount;
+
+        let paymentType = 'partial';
+        if (paymentAmount >= totalInterestDue) {
+            paymentType = 'full';
+        }
+        if (!loan.interestPayments) loan.interestPayments = [];
+        loan.interestPayments.push({ date: new Date().toISOString(), amount: paymentAmount, type: paymentType });
+        localStorage.setItem('loans', JSON.stringify(loans));
+        hidePopup('interestPopup');
+        calcSummary();
+    }
+
+    function calcSummary() {
+      const tableBody = document.querySelector('#summaryTable tbody');
+      const mobileCardsContainer = document.getElementById('mobileCards');
+      const mobileSummary = document.getElementById('mobileSummary');
+      if (!tableBody || !mobileCardsContainer || !mobileSummary) return;
+      
+      tableBody.innerHTML = '';
+      mobileCardsContainer.innerHTML = '';
+      
+      const now = new Date();
+      const chartData = [];
+      let totalPrincipal = 0, totalRemainingInterest = 0, totalNextMonth = 0;
+      let totalInterestPaidThisMonth = 0;
+
+      loans.forEach((loan, index) => {
+        const totalPaid = getTotalPaid(loan);
+        let netPrincipal = loan.principal - totalPaid;
+        if (netPrincipal < 0) netPrincipal = 0;
+        
+        const remainingInterest = getRemainingInterest(loan);
+        const monthlyInterest = parseFloat((netPrincipal * loan.rate / 100).toFixed(2));
+        const nextMonthInterest = remainingInterest + monthlyInterest;
+        
+        let nextDueDate;
+        if (loan.dueDate) {
+          nextDueDate = new Date(loan.dueDate);
+        } else {
+          const startDate = new Date(loan.startDate);
+          const startDay = startDate.getDate();
+          nextDueDate = new Date(now.getFullYear(), now.getMonth(), startDay);
+          if (now.getDate() > startDay) {
+            nextDueDate.setMonth(now.getMonth() + 1);
+          }
+        }
+        
+        const daysUntilDue = Math.floor((nextDueDate - now) / (1000 * 60 * 60 * 24));
+        const daysPassed = Math.floor((now - new Date(loan.startDate)) / (1000 * 60 * 60 * 24));
+        
+        const hasUnpaidInterest = remainingInterest > 0;
+        const hasMadeFullPaymentThisMonth = (loan.interestPayments || []).some(p => {
+            const paymentDate = new Date(p.date);
+            return p.type === 'full' && paymentDate.getMonth() === now.getMonth() && paymentDate.getFullYear() === now.getFullYear();
+        });
+        const hasPartialInterestPaid = (loan.interestPayments || []).some(p => p.type === 'partial') && remainingInterest > 0;
+
+        let isOverdue = false;
+        if (hasUnpaidInterest && daysUntilDue < 0) {
+            isOverdue = true;
+        }
+
+        let rowClass = '';
+        let cardClass = '';
+
+        if (isOverdue) {
+            rowClass = 'row-overdue';
+            cardClass = 'card-overdue';
+        } else if (hasPartialInterestPaid) {
+            rowClass = 'row-partial-paid';
+            cardClass = 'card-partial-paid';
+        } else if (daysUntilDue >= 0 && daysUntilDue <= 5 && !hasMadeFullPaymentThisMonth && hasUnpaidInterest) {
+            rowClass = 'row-soon-due';
+            cardClass = 'card-soon-due';
+        }
+        
+        let interestButtonText;
+        let interestButtonClass;
+        if (remainingInterest <= 0 && (loan.interestPayments || []).length > 0) {
+            interestButtonText = 'จ่ายแล้ว';
+            interestButtonClass = 'btn-paid';
+        } else {
+            interestButtonText = 'จ่ายดอก';
+            interestButtonClass = 'btn-interest';
+        }
+        
+        totalPrincipal += netPrincipal;
+        totalRemainingInterest += remainingInterest;
+        totalNextMonth += nextMonthInterest;
+
+        (loan.interestPayments || []).forEach(payment => {
+          const paymentDate = new Date(payment.date);
+          if (paymentDate.getMonth() === now.getMonth() && paymentDate.getFullYear() === now.getFullYear()) {
+            totalInterestPaidThisMonth += payment.amount;
+          }
+        });
+
+        tableBody.innerHTML += `
+          <tr class="${rowClass}">
+            <td>${loan.name}</td>
+            <td>${netPrincipal.toLocaleString()}</td>
+            <td>${loan.rate}%</td>
+            <td>${formatDate(loan.startDate)}</td>
+            <td>${daysPassed} วัน</td>
+            <td class="val-red">${remainingInterest.toLocaleString()}</td>
+            <td>${nextMonthInterest.toLocaleString()}</td>
+            <td><button onclick="showEditDueDatePopup(${index})" class="btn-edit">${formatDate(nextDueDate)}</button></td>
+            <td><button onclick="showRepaymentPopup(${index})" class="btn-repay">คืนเงินต้น</button></td>
+            <td><button onclick="showInterestPopup(${index})" class="${interestButtonClass}">${interestButtonText}</button></td>
+            <td><button onclick="showHistoryPopup(${index})" class="btn-history">ประวัติ</button></td>
+            <td><button onclick="showDeletePopup(${index})" class="btn-delete">ลบ</button></td>
+          </tr>`;
+
+        const card = document.createElement('div');
+        card.className = `loan-card ${cardClass}`;
+        card.innerHTML = `
+          <div class="card-header">
+            <span class="name">${loan.name}</span>
+          </div>
+          <div class="card-content">
+            <div>
+              <span class="card-label">เงินต้นคงเหลือ:</span>
+              <span class="card-value">${netPrincipal.toLocaleString()} บาท</span>
+            </div>
+            <div>
+              <span class="card-label">ดอกเบี้ยคงเหลือ:</span>
+              <span class="card-value val-red">${remainingInterest.toLocaleString()} บาท</span>
+            </div>
+            <div>
+              <span class="card-label">ดอกเบี้ยเดือนหน้า:</span>
+              <span class="card-value">${nextMonthInterest.toLocaleString()} บาท</span>
+            </div>
+            <div>
+              <span class="card-label">ครบกำหนด:</span>
+              <span class="card-value">${formatDate(nextDueDate)} (ในอีก ${daysUntilDue} วัน)</span>
+            </div>
+          </div>
+          <div class="card-buttons">
+            <button onclick="showRepaymentPopup(${index})" class="btn-repay">คืนเงินต้น</button>
+            <button onclick="showInterestPopup(${index})" class="${interestButtonClass}">${interestButtonText}</button>
+            <button onclick="showHistoryPopup(${index})" class="btn-history">ประวัติ</button>
+            <button onclick="showDeletePopup(${index})" class="btn-delete">ลบ</button>
+          </div>
+        `;
+        mobileCardsContainer.appendChild(card);
+        
+        chartData.push({ name: loan.name, remaining: netPrincipal });
+      });
+
+      document.getElementById('summaryFooter').innerHTML =
+        `💰 เงินต้นคงเหลือรวม: <span class="val-gold">${totalPrincipal.toLocaleString()} บาท</span><br>` +
+        `📈 ดอกเบี้ยคงเหลือ: <span class="val-red">${totalRemainingInterest.toLocaleString()} บาท</span><br>` +
+        `🔮 ดอกเบี้ยเดือนหน้า: <span class="val-blue">${totalNextMonth.toLocaleString()} บาท</span><br>` +
+        `💸 ดอกเบี้ยที่ได้รับแล้วในเดือนนี้: <span class="val-green">${totalInterestPaidThisMonth.toLocaleString()} บาท</span>`;
+
+      mobileSummary.innerHTML =
+        `💰 เงินต้นคงเหลือรวม: <span class="val-gold">${totalPrincipal.toLocaleString()} บาท</span><br>` +
+        `📈 ดอกเบี้ยคงเหลือ: <span class="val-red">${totalRemainingInterest.toLocaleString()} บาท</span><br>` +
+        `🔮 ดอกเบี้ยเดือนหน้า: <span class="val-blue">${totalNextMonth.toLocaleString()} บาท</span><br>` +
+        `💸 ดอกเบี้ยที่ได้รับแล้วในเดือนนี้: <span class="val-green">${totalInterestPaidThisMonth.toLocaleString()} บาท</span>`;
+
+      if (chartData.length > 0) updateChart(chartData);
+      else if (window.loanChart && typeof window.loanChart.destroy === 'function') window.loanChart.destroy();
+    }
+
+    function updateChart(data) {
+      const canvas = document.getElementById('loanChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (window.loanChart && typeof window.loanChart.destroy === 'function') {
+        window.loanChart.destroy();
+      }
+      const maxAmount = Math.max(...data.map(d => d.remaining));
+      window.loanChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: data.map(l => l.name),
+          datasets: [{
+            label: 'เงินต้นคงเหลือ (บาท)',
+            data: data.map(l => l.remaining),
+            backgroundColor: data.map(l => `rgba(255, 105, 135, ${Math.max(0.3, l.remaining / maxAmount)})`),
+            borderRadius: 10
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    function showRepaymentPopup(index) {
+      currentLoanIndex = index;
+      const loanName = loans[index].name;
+      document.getElementById('repaymentMessage').textContent = `กรุณา กรอกจำนวนเงินต้นที่ ${loanName} คืน:`;
+      showPopup('repaymentPopup');
+    }
+
+    function submitRepayment() {
+      const amount = document.getElementById('repaymentAmount').value.replace(/,/g, '');
+      if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+        alert('กรุณากรอกจำนวนที่ถูกต้อง');
+        return;
+      }
+      if (!loans[currentLoanIndex].repayments) loans[currentLoanIndex].repayments = [];
+      loans[currentLoanIndex].repayments.push({ amount: parseFloat(amount), date: new Date().toISOString() });
+      localStorage.setItem('loans', JSON.stringify(loans));
+      hidePopup('repaymentPopup');
+      calcSummary();
+    }
+    
+    function showDeletePopup(index) {
+      currentLoanIndex = index;
+      const loanName = loans[index].name;
+      document.getElementById('deleteMessage').textContent = `คุณแน่ใจว่าต้องการลบลูกหนี้ ${loanName}?`;
+      showPopup('deletePopup');
+    }
+
+    function confirmDelete() {
+      loans.splice(currentLoanIndex, 1);
+      localStorage.setItem('loans', JSON.stringify(loans));
+      hidePopup('deletePopup');
+      calcSummary();
+    }
+
+    function showHistoryPopup(index) {
+      const loan = loans[index];
+      const historyList = document.getElementById('historyList');
+      historyList.innerHTML = '';
+      
+      const repaymentsWithIndex = (loan.repayments || []).map((r, i) => ({
+        ...r,
+        kind: 'คืนเงินต้น',
+        status: null,
+        originalIndex: i
+      }));
+      const interestsWithIndex = (loan.interestPayments || []).map((p, idx) => ({
+        ...p,
+        kind: 'จ่ายดอกเบี้ย',
+        status: p.type || null,
+        originalIndex: idx
+      }));
+
+      const allTransactions = [...repaymentsWithIndex, ...interestsWithIndex];
+      allTransactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      if (allTransactions.length === 0) {
+        historyList.innerHTML = `<li>ไม่มีประวัติการทำรายการสำหรับ ${loan.name}</li>`;
+      } else {
+        allTransactions.forEach((t) => {
+          const statusText = t.status === 'partial' ? ' (บางส่วน)' : t.status === 'full' ? ' (ครบถ้วน)' : '';
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <span>${t.kind}${statusText}: ${Number(t.amount).toLocaleString()} บาท</span>
+            <span class="date">${formatDate(t.date)}</span>
+            <button onclick="showEditPaymentPopup(${index}, '${t.kind === 'คืนเงินต้น' ? 'repayments' : 'interestPayments'}', ${t.originalIndex})" class="btn-edit">แก้ไข</button>
+          `;
+          historyList.appendChild(li);
+        });
+      }
+      showPopup('historyPopup');
+    }
+
+    function showEditPaymentPopup(loanIndex, transactionType, transactionIndex) {
+        currentLoanIndex = loanIndex;
+        currentTransactionIndex = transactionIndex;
+        currentTransactionType = transactionType;
+
+        const loan = loans[loanIndex];
+        const transaction = loan[transactionType][transactionIndex];
+
+        document.getElementById('editPaymentMessage').textContent =
+            `แก้ไขจำนวนเงินสำหรับรายการ "${transactionType === 'repayments' ? 'คืนเงินต้น' : 'จ่ายดอกเบี้ย'}" (${formatDate(transaction.date)}):`;
+        document.getElementById('editPaymentAmount').value = Number(transaction.amount).toLocaleString();
+        
+        showPopup('editPaymentPopup');
+    }
+
+    function submitEditPayment() {
+        const newAmount = parseFloat(document.getElementById('editPaymentAmount').value.replace(/,/g, ''));
+        if (isNaN(newAmount) || newAmount <= 0) {
+            alert('กรุณากรอกจำนวนเงินที่ถูกต้อง');
+            return;
+        }
+        const loan = loans[currentLoanIndex];
+        loan[currentTransactionType][currentTransactionIndex].amount = newAmount;
+        localStorage.setItem('loans', JSON.stringify(loans));
+        hidePopup('editPaymentPopup');
+        hidePopup('historyPopup');
+        calcSummary();
+    }
+    
+    function showEditDueDatePopup(index) {
+        currentLoanIndex = index;
+        const loan = loans[index];
+        document.getElementById('editDueDateMessage').textContent = `แก้ไขวันครบกำหนดสำหรับ ${loan.name}:`;
+        document.getElementById('editDueDateInput').value = loan.dueDate || '';
+        showPopup('editDueDatePopup');
+    }
+
+    function submitEditDueDate() {
+        const newDueDate = document.getElementById('editDueDateInput').value;
+        const loan = loans[currentLoanIndex];
+        if (newDueDate && isNaN(Date.parse(newDueDate))) {
+            alert('กรุณาเลือกวันที่ที่ถูกต้อง');
+            return;
+        }
+        loan.dueDate = newDueDate || null;
+        localStorage.setItem('loans', JSON.stringify(loans));
+        hidePopup('editDueDatePopup');
+        calcSummary();
+    }
+
+    function downloadExcel() {
+      const wb = XLSX.utils.book_new();
+      const wsData = [['ชื่อ', 'เงินต้นคงเหลือ', 'ดอกเบี้ย/เดือน', 'วันที่เริ่ม', 'กำหนดวันจ่ายดอก', 'วันที่ผ่านมา', 'ดอกเบี้ยคงเหลือ', 'ดอกเบี้ยเดือนหน้า']];
+      const now = new Date();
+      loans.forEach(loan => {
+        const totalPaid = getTotalPaid(loan);
+        const netPrincipal = loan.principal - totalPaid;
+        const startDate = new Date(loan.startDate);
+        const daysPassed = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+        const remainingInterest = getRemainingInterest(loan);
+        const monthlyInterest = parseFloat((netPrincipal * loan.rate / 100).toFixed(2));
+        const nextMonthInterest = remainingInterest + monthlyInterest;
+        const dueDate = loan.dueDate ? formatDate(loan.dueDate) : 'คำนวณอัตโนมัติ';
+        wsData.push([loan.name, netPrincipal, loan.rate + '%', formatDate(loan.startDate), dueDate, `${daysPassed} วัน`, parseFloat(remainingInterest), parseFloat(nextMonthInterest)]);
+      });
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsData), 'Loan Summary');
+      XLSX.writeFile(wb, 'loan_summary.xlsx');
+    }
+
+    function uploadData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const newData = JSON.parse(e.target.result);
+          if (!Array.isArray(newData)) throw 'รูปแบบข้อมูลไม่ถูกต้อง';
+          newData.forEach(item => {
+            if (typeof item.name !== 'string') throw 'ชื่อไม่ถูกต้อง';
+            if (typeof item.principal !== 'number' || item.principal < 0) throw 'เงินต้นไม่ถูกต้อง';
+            if (typeof item.rate !== 'number' || item.rate < 0) throw 'อัตราดอกเบี้ยไม่ถูกต้อง';
+            if (typeof item.startDate !== 'string' || isNaN(Date.parse(item.startDate))) throw 'วันที่เริ่มไม่ถูกต้อง';
+            if (item.dueDate && (typeof item.dueDate !== 'string' || isNaN(Date.parse(item.dueDate)))) throw 'กำหนดวันจ่ายดอกไม่ถูกต้อง';
+            if (!Array.isArray(item.repayments)) throw 'ประวัติการคืนเงินไม่ถูกต้อง';
+            if (!Array.isArray(item.interestPayments)) throw 'ประวัติการจ่ายดอกเบี้ยไม่ถูกต้อง';
+          });
+          loans = newData;
+          localStorage.setItem('loans', JSON.stringify(loans));
+          calcSummary();
+          alert('นำเข้าข้อมูลสำเร็จ');
+        } catch (err) {
+          alert('เกิดข้อผิดพลาด: ' + err);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    document.getElementById('loanForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const principalValue = document.getElementById('principal').value.replace(/,/g, '');
+      loans.push({
+        name: document.getElementById('name').value,
+        principal: parseFloat(principalValue),
+        rate: parseFloat(document.getElementById('rate').value),
+        startDate: document.getElementById('startDate').value,
+        dueDate: document.getElementById('dueDate').value || null,
+        repayments: [],
+        interestPayments: []
+      });
+      localStorage.setItem('loans', JSON.stringify(loans));
+      e.target.reset();
+      calcSummary();
+      showPopup('successPopup');
+      setTimeout(() => hidePopup('successPopup'), 2000);
+    });
+
+    function showPopup(id) {
+      const popup = document.getElementById(id);
+      if (!popup) return;
+      popup.style.display = 'flex';
+      requestAnimationFrame(() => popup.classList.add('show'));
+    }
+
+    function hidePopup(id) {
+      const popup = document.getElementById(id);
+      if (!popup) return;
+      popup.classList.remove('show');
+      setTimeout(() => {
+        popup.style.display = 'none';
+        if (id === 'repaymentPopup') document.getElementById('repaymentAmount').value = '';
+      }, 300);
+    }
+    
+    function formatNumberInput(event) {
+        const input = event.target;
+        let value = input.value.replace(/,/g, '');
+        const parts = value.split('.');
+        if (parts.length > 2) {
+            value = parts[0] + '.' + parts.slice(1).join('');
+        }
+        const lastCharIsDot = value.slice(-1) === '.';
+        const number = parseFloat(value);
+        if (!isNaN(number)) {
+            let formatted = number.toLocaleString('en-US');
+            if (lastCharIsDot && !formatted.includes('.')) formatted += '.';
+            input.value = formatted;
+        } else {
+            input.value = lastCharIsDot ? '.' : '';
+        }
+    }
+
+    // attach formatter to numeric text inputs
+    function attachFormatters(){
+      document.querySelectorAll('.formatted-input').forEach(input => {
+        input.removeEventListener('input', formatNumberInput);
+        input.addEventListener('input', formatNumberInput);
+      });
+    }
+
+    // initial load
+    attachFormatters();
+    calcSummary();
+  </script>
 </body>
 </html>
